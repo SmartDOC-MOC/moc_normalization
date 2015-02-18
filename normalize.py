@@ -5,6 +5,8 @@ TODO LICENCE (or in separate file)
 
 TODO description
 
+End of line MUST BE either CRLF (Windows) or LF (OSX, *nix).
+
 Sample usage:
     normalize.py /path/to/utf-8/text/file.txt -o /path/to/normalized/output.txt
 
