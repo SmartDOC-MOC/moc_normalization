@@ -73,15 +73,14 @@ TRANSFORMATIONS = [
 # ¹ U+00B9 to U+0031  1
 # º U+00BA to U+006F  o
     (u"»", u"\""), # U+00BB
-# ¼ U+00BC to U+0031 U+002F U+0034  1/4
-# ½ U+00BD to U+0031 U+002F U+0032  1/2 
-# ¾ U+00BE to U+0033 U+002F U+0034  3/4 
+# ¼ U+00BC to U+0031 U+002F U+0034  1/4 # done by FRACTION SLASH replace after norm.
+# ½ U+00BD to U+0031 U+002F U+0032  1/2 # done by FRACTION SLASH replace after norm.
+# ¾ U+00BE to U+0033 U+002F U+0034  3/4 # done by FRACTION SLASH replace after norm.
     (u"Æ", u"AE"), # U+00C6
     (u"æ", u"ae"), # U+00E6
     (u"Œ", u"OE"), # U+0152
     (u"œ", u"oe"), # U+0153
-    (u"ˆ", u"^"),
-    (u"˜", u"~"),
+#˜   U+02DC to U+0020 U+0303    ̃
     (u"–", u"-"), # U+2013
     (u"—", u"-"), # U+2014
     (u"‘", u"\'"), # U+2018
