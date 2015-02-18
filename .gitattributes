@@ -1,0 +1,2 @@
+# Never mess with line endings in text resources
+*.txt -text
