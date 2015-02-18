@@ -20,7 +20,7 @@ import argparse
 import sys
 import unicodedata
 import io
-import codecs
+# import codecs
 
 # ==============================================================================
 # Logging
@@ -36,7 +36,7 @@ ERRCODE_OK = 0
 ERRCODE_NOFILE = 10
 
 ALLOWED_INPUT=u"""	 !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~ ¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿŒœŠšŸŽžƒˆ˜–—‘’‚“”„†‡•…‰‹›€™ﬁﬂﬀﬃﬄ"""
-CHAR_ERR_LIM = 10
+CHAR_ERR_LIM = 5
 
 # ==============================================================================
 # Utility private fonctions
@@ -65,9 +65,8 @@ def _initLogger(logger, debug=False):
         level = logging.DEBUG
     logger.setLevel(level)
 
-def _headgen(seq, count=10):
-    for i in range(min(count, seq)):
-        yield seq[i]
+def _unichr2str(unichar):
+    return unicodedata.name(unichar, repr(unichar))
 
 # ==============================================================================
 # Main function
@@ -100,7 +99,7 @@ def main():
     logger.debug(_DBGSEP)
 
     # --------------------------------------------------------------------------
-    charset = ALLOWED_INPUT + u'\u000a'
+    charset = ALLOWED_INPUT + u'\u000a' # Tolerate '\n' (LF) EOL
 
     file_output = None
     fo_is_real_file = False
@@ -117,25 +116,34 @@ def main():
         line_no = 0
         # with codecs.open(args.input, 'r', "UTF-8") as file_input:
         with io.open(args.input, 'r') as file_input:
+            # io lines are unicode code point sequences with LF-normalized EOL
             for line in file_input:
                 line_no += 1
+
                 # Check input
                 extra_chars = []
+                char_no = 0
                 for char in line:
+                    char_no += 1
                     if char not in charset:
-                        extra_chars.append(char)
+                        extra_chars.append((char, char_no))
                 if extra_chars:
                     logger.error("Got illegal %d character(s) in line %d : " % (len(extra_chars), line_no))
+                    for i in range(min(CHAR_ERR_LIM, len(extra_chars))):
+                        char, pos = extra_chars[i]
+                        logger.error("\tl:%03d c:%03d %s" %  (line_no, pos, _unichr2str(char)))
                     if len(extra_chars) > CHAR_ERR_LIM:
-                        logger.error("\t" + "; ".join(map(repr,_headgen(extra_chars, CHAR_ERR_LIM))) + " (and others...)")
-                    else:
-                        logger.error("\t" + "; ".join(map(repr,extra_chars)))
+                        logger.error("\t ... and %d other(s)." % (len(extra_chars) - CHAR_ERR_LIM))
 
                 # TODO Perform custom translations
                 # replace line
+                line_tr = line
 
-                # Unicode normalization and output
-                print >>file_output, unicodedata.normalize('NFKC', line).encode("UTF-8"),
+                # Unicode normalization 
+                line_norm = unicodedata.normalize('NFKC', line_tr)
+
+                # Output new line
+                print >>file_output, line_norm.encode("UTF-8"),
     finally:
         if fo_is_real_file:
             file_output.close()
