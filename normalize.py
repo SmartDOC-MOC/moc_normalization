@@ -3,9 +3,16 @@
 """
 TODO LICENCE (or in separate file)
 
-TODO description
 
-End of line MUST BE either CRLF (Windows), CR (old Macintosh) or LF (OSX, *nix).
+This file is part of the tools used for the evaluation of OCR accuracy in the 
+context of the challenge 2 "Mobile OCR Challenge" of the SmartDOC competition 
+at ICDAR 2015. This particular program checks and normalizes participants 
+results, and is used before computing OCR accuracy.
+
+
+Warning:
+    End of line MUST BE either CRLF (Windows), CR (old Macintosh) or LF (OSX, 
+    *nix).
 
 Sample usage:
     normalize.py /path/to/utf-8/text/file.txt -o /path/to/normalized/output.txt
@@ -139,7 +146,7 @@ def main():
                 # replace line
                 line_tr = line
 
-                # Unicode normalization 
+                # Unicode normalization (use "NFKD" to give half weight to error on diacritics)
                 line_norm = unicodedata.normalize('NFKC', line_tr)
 
                 # Output new line
