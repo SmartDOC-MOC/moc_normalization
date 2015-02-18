@@ -146,7 +146,7 @@ def main():
                 # replace line
                 line_tr = line
 
-                # Unicode normalization (use "NFKD" to give half weight to error on diacritics)
+                # Unicode normalization (use "NFKD" to give half weight to errors on diacritics)
                 line_norm = unicodedata.normalize('NFKC', line_tr)
 
                 # Output new line
