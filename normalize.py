@@ -9,9 +9,10 @@ context of the challenge 2 "Mobile OCR Challenge" of the SmartDOC competition
 at ICDAR 2015. This particular program checks and normalizes participants 
 results, and is used before computing OCR accuracy.
 
+Normalization performed here is idempotent.
 
 Warning:
-    End of line MUST BE either CRLF (Windows), CR (old Macintosh) or LF (OSX, 
+    End of line can be EITHER CRLF (Windows), CR (old Macintosh) or LF (OSX, 
     *nix).
 
 Sample usage:
@@ -35,18 +36,83 @@ logger = logging.getLogger(__name__)
 
 # ==============================================================================
 # Constants
-PROG_VERSION = "0.1"
+PROG_VERSION = "1.0"
 PROG_DESCR = "OCR Result Normalizer for ICDAR15 SmartDOC"
 PROG_NAME = "moc_norm"
 
 ERRCODE_OK = 0
 ERRCODE_NOFILE = 10
 
-ALLOWED_INPUT=u"""	 !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~ ¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿŒœŠšŸŽžƒˆ˜–—‘’‚“”„†‡•…‰‹›€™ﬁﬂﬀﬃﬄ"""
+ALLOWED_INPUT = u""" !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~ ¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿŒœŠšŸŽžƒˆ˜–—‘’‚“”„†‡•…‰‹›€™ﬁﬂﬀﬃﬄ"""
+# Horizontal tab added separately for convenience
+ALLOWED_INPUT += u"\u0009"
+# additions due to Unicode normalization:
+# - 0308 COMBINING DIAERESIS
+# - 0301 COMBINING ACUTE ACCENT 
+# - 03BC GREEK SMALL LETTER MU  
+# - 0327 COMBINING CEDILLA  
+# - 0303 COMBINING TILDE
+# - 0304 COMBINING MACRON   
+# - 2044 FRACTION SLASH 
+ALLOWED_INPUT += u"\u0308\u0301\u03BC\u0327\u0303\u0304\u2044"
+
+TRANSFORMATIONS = [
+    (u"\u0009", u" "), # HTAB to SPACE
+    (u"\u00A0", u" "), # NBSP to SPACE
+    (u"¦", u"|"), # U+00A6 # Commonly interchanged
+# ¨ U+00A8 to U+0020 U+0308    ̈
+# ª U+00AA to U+0061  a
+    (u"«", u"\""), # U+00AB
+    (u"\u00AD", u""), # remove SOFT HYPHEN
+# ¯ U+00AF to U+0020 U+0304    ̄
+# ² U+00B2 to U+0032  2
+# ³ U+00B3 to U+0033  3
+# ´ U+00B4 to U+0020 U+0301    ́
+# µ U+00B5 to U+03BC  μ
+# ¸ U+00B8 to U+0020 U+0327    ̧
+# ¹ U+00B9 to U+0031  1
+# º U+00BA to U+006F  o
+    (u"»", u"\""), # U+00BB
+# ¼ U+00BC to U+0031 U+002F U+0034  1/4
+# ½ U+00BD to U+0031 U+002F U+0032  1/2 
+# ¾ U+00BE to U+0033 U+002F U+0034  3/4 
+    (u"Æ", u"AE"), # U+00C6
+    (u"æ", u"ae"), # U+00E6
+    (u"Œ", u"OE"), # U+0152
+    (u"œ", u"oe"), # U+0153
+    (u"ˆ", u"^"),
+    (u"˜", u"~"),
+    (u"–", u"-"), # U+2013
+    (u"—", u"-"), # U+2014
+    (u"‘", u"\'"), # U+2018
+    (u"’", u"\'"), # U+2019
+    (u"‚", u"\'"), # U+201A
+    (u"“", u"\""), # U+201C
+    (u"”", u"\""), # U+201D
+    (u"„", u"\""), # U+201E
+# …   U+2026 to U+002E U+002E U+002E    ...
+    (u"‹", u"\'"), # U+2039
+    (u"›", u"\'"), # U+203A
+# ™   U+2122 to U+0054 U+004D   TM
+    # (u"\uFB00", u"ff"),  # Replace ff, fi, fl, ffi, ffl ligatures with separated 
+    # (u"\uFB01", u"fi"),  # chars. before Unicode normalization inserts
+    # (u"\uFB02", u"fl"),  # "200c ZERO WIDTH NON-JOINER"
+    # (u"\uFB03", u"ffi"), # (actually not wrote to UTF-8 output so not done here)
+    # (u"\uFB04", u"ffl"),
+    (u"⁄", u"/"), # FRACTION SLASH U+2044
+    ]
+
 CHAR_ERR_LIM = 5
 
 # ==============================================================================
-# Utility private fonctions
+def _transform(unistr):
+    s2 = unistr
+    for fr, to in TRANSFORMATIONS:
+        s2 = s2.replace(fr, to)
+    return s2
+
+# ==============================================================================
+# Utility private functions
 def _dumpArgs(args, logger=logger):
     logger.debug("Arguments:")
     for (k, v) in args.__dict__.items():
@@ -134,6 +200,7 @@ def main():
                     char_no += 1
                     if char not in charset:
                         extra_chars.append((char, char_no))
+                    # logger.debug("\tl:%03d c:%03d %04x %s" %  (line_no, char_no, ord(char), _unichr2str(char)))
                 if extra_chars:
                     logger.error("Got illegal %d character(s) in line %d : " % (len(extra_chars), line_no))
                     for i in range(min(CHAR_ERR_LIM, len(extra_chars))):
@@ -142,15 +209,14 @@ def main():
                     if len(extra_chars) > CHAR_ERR_LIM:
                         logger.error("\t ... and %d other(s)." % (len(extra_chars) - CHAR_ERR_LIM))
 
-                # TODO Perform custom translations
-                # replace line
-                line_tr = line
-
-                # Unicode normalization (use "NFKD" to give half weight to errors on diacritics)
-                line_norm = unicodedata.normalize('NFKC', line_tr)
+                # Unicode normalization
+                line_norm = unicodedata.normalize('NFKC', line)
+                
+                # Perform custom translations
+                line_tr = _transform(line_norm)
 
                 # Output new line
-                print >>file_output, line_norm.encode("UTF-8"),
+                print >>file_output, line_tr.encode("UTF-8"),
     finally:
         if fo_is_real_file:
             file_output.close()

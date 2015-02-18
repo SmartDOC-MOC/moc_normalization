@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 # ==============================================================================
 # Constants
-PROG_VERSION = "0.1"
+PROG_VERSION = "1.0"
 PROG_DESCR = "OCR Result Explorer for ICDAR15 SmartDOC"
 PROG_NAME = "moc_explorer"
 
