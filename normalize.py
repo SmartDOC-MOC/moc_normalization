@@ -20,6 +20,7 @@ import argparse
 import sys
 import unicodedata
 import io
+import codecs
 
 # ==============================================================================
 # Logging
@@ -33,6 +34,9 @@ PROG_NAME = "moc_norm"
 
 ERRCODE_OK = 0
 ERRCODE_NOFILE = 10
+
+ALLOWED_INPUT=u"""	 !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~ ¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿŒœŠšŸŽžƒˆ˜–—‘’‚“”„†‡•…‰‹›€™ﬁﬂﬀﬃﬄ"""
+CHAR_ERR_LIM = 10
 
 # ==============================================================================
 # Utility private fonctions
@@ -60,6 +64,10 @@ def _initLogger(logger, debug=False):
     if debug:
         level = logging.DEBUG
     logger.setLevel(level)
+
+def _headgen(seq, count=10):
+    for i in range(min(count, seq)):
+        yield seq[i]
 
 # ==============================================================================
 # Main function
@@ -92,25 +100,45 @@ def main():
     logger.debug(_DBGSEP)
 
     # --------------------------------------------------------------------------
+    charset = ALLOWED_INPUT + u'\u000a'
+
     file_output = None
     fo_is_real_file = False
     try:
         if args.output:
-            file_output = io.open(args.output, 'wt')
+            # file_output = codecs.open(args.output, 'w', "UTF-8")
+            file_output = open(args.output, 'w')
             fo_is_real_file = True
         else:
             file_output = sys.stdout
+            logger.info("Output results to stdout.")
 
         logger.debug("--- Process started. ---")
-        with io.open(args.input, 'rt') as file_input:
+        line_no = 0
+        # with codecs.open(args.input, 'r', "UTF-8") as file_input:
+        with io.open(args.input, 'r') as file_input:
             for line in file_input:
-                # TODO check input
-                # TODO perform extra normalization (tab to space, quotes, pipe)
-                print >>file_output, unicodedata.normalize('NFKC', line),
+                line_no += 1
+                # Check input
+                extra_chars = []
+                for char in line:
+                    if char not in charset:
+                        extra_chars.append(char)
+                if extra_chars:
+                    logger.error("Got illegal %d character(s) in line %d : " % (len(extra_chars), line_no))
+                    if len(extra_chars) > CHAR_ERR_LIM:
+                        logger.error("\t" + "; ".join(map(repr,_headgen(extra_chars, CHAR_ERR_LIM))) + " (and others...)")
+                    else:
+                        logger.error("\t" + "; ".join(map(repr,extra_chars)))
+
+                # TODO Perform custom translations
+                # replace line
+
+                # Unicode normalization and output
+                print >>file_output, unicodedata.normalize('NFKC', line).encode("UTF-8"),
     finally:
         if fo_is_real_file:
             file_output.close()
-
 
     logger.debug("--- Process complete. ---")
     # --------------------------------------------------------------------------
@@ -119,7 +147,6 @@ def main():
     logger.debug(_DBGSEP)
     return ERRCODE_OK
     # --------------------------------------------------------------------------
-
 
 # ==============================================================================
 # Entry point
