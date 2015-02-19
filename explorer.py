@@ -103,7 +103,7 @@ def main():
             logger.warn("Unknown encoding %s specified in locale().\n" % encoding)
             encoder = codecs.getwriter('UTF-8')
         if encoding.upper() != 'UTF-8':
-            logger.warn("Stdout in %s format. Diacritical signs are represented in XML-coded format." % encoding)
+            logger.warn("Stdout in %s format. Out-of-charset signs are represented in XML-coded format." % encoding)
         try:
             sys.stdout = encoder(sys.stdout.buffer, 'xmlcharrefreplace')
         except AttributeError:
