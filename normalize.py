@@ -178,16 +178,17 @@ def main():
     try:
         if args.output:
             # file_output = codecs.open(args.output, 'w', "UTF-8")
-            file_output = open(args.output, 'w')
+            file_output = open(args.output, "w") # FIXME specify target encoding and EOL
             fo_is_real_file = True
         else:
             file_output = sys.stdout
             logger.info("Output results to stdout.")
+            # FIXME detect necessary encoding here, subst. policy and warn if necessary
 
         logger.debug("--- Process started. ---")
         line_no = 0
         # with codecs.open(args.input, 'r', "UTF-8") as file_input:
-        with io.open(args.input, 'rt', encoding="UTF-8") as file_input:
+        with io.open(args.input, "rt", encoding="UTF-8", newline=None, errors="strict") as file_input:
             # io lines are unicode code point sequences with LF-normalized EOL
             for line in file_input:
                 line_no += 1
@@ -215,7 +216,11 @@ def main():
                 line_tr = _transform(line_norm)
 
                 # Output new line
-                print >>file_output, line_tr.encode("UTF-8"),
+                print >>file_output, line_tr.encode("UTF-8"), 
+                # FIXME encoding must be done at the output driver level, warning for unsupported charset if required
+                # Use io.TextIOBase.write()
+
+
     finally:
         if fo_is_real_file:
             file_output.close()

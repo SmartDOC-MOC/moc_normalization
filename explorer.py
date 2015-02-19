@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 # ==============================================================================
 # Constants
-PROG_VERSION = "1.0"
+PROG_VERSION = "1.1"
 PROG_DESCR = "OCR Result Explorer for ICDAR15 SmartDOC"
 PROG_NAME = "moc_explorer"
 
@@ -88,7 +88,7 @@ def main():
     # --------------------------------------------------------------------------
     logger.debug("--- Process started. ---")
     line_no = 0
-    with io.open(args.input, 'r') as file_input:
+    with io.open(args.input, 'r', encoding="UTF-8", newline=None, errors="strict") as file_input:
         # io lines are unicode code point sequences with LF-normalized EOL
         for line in file_input:
             line_no += 1
