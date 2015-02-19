@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 """
 Unicode Explorer.
+
+It gives line by line, character by character information about the content of 
+an UTF-8 encoded file.
 """
 
 
@@ -11,8 +14,9 @@ import logging
 import argparse
 import sys
 import unicodedata
+import codecs
+import locale
 import io
-# import codecs
 
 # ==============================================================================
 # Logging
@@ -26,6 +30,7 @@ PROG_NAME = "moc_explorer"
 
 ERRCODE_OK = 0
 ERRCODE_NOFILE = 10
+ERRCODE_IOERROR = 20
 
 # ==============================================================================
 # Utility private functions
@@ -87,17 +92,37 @@ def main():
 
     # --------------------------------------------------------------------------
     logger.debug("--- Process started. ---")
+
+    encoder = None
+    logger.debug("sys.stdout.encoding = %s" % sys.stdout.encoding)
+    if not sys.stdout.encoding or sys.stdout.encoding.upper() != 'UTF-8':
+        encoding = sys.stdout.encoding or locale.getpreferredencoding()
+        try:
+            encoder = codecs.getwriter(encoding)
+        except LookupError:
+            logger.warn("Unknown encoding %s specified in locale().\n" % encoding)
+            encoder = codecs.getwriter('UTF-8')
+        if encoding.upper() != 'UTF-8':
+            logger.warn("Stdout in %s format. Diacritical signs are represented in XML-coded format." % encoding)
+        try:
+            sys.stdout = encoder(sys.stdout.buffer, 'xmlcharrefreplace')
+        except AttributeError:
+            sys.stdout = encoder(sys.stdout, 'xmlcharrefreplace')
+
     line_no = 0
-    with io.open(args.input, 'r', encoding="UTF-8", newline=None, errors="strict") as file_input:
-        # io lines are unicode code point sequences with LF-normalized EOL
-        for line in file_input:
-            line_no += 1
-            char_no = 0
-            print "l:%03d (%d char.)" % (line_no, len(line))
-            print u"\"%s\"" % line.rstrip(u"\n")
-            for char in line:
-                char_no += 1
-                print "\tc:%03d %04x %s" %  (char_no, ord(char), _unichr2str(char))
+    try:
+        with io.open(args.input, 'rt', encoding="UTF-8", newline=None, errors="strict") as file_input:
+            for line in file_input:
+                line_no += 1
+                char_no = 0
+                sys.stdout.write("l:%03d (%d char.)\n" % (line_no, len(line)))
+                sys.stdout.write(line)
+                for char in line:
+                    char_no += 1
+                    sys.stdout.write("\tc:%03d U+%04x %s\n" %  (char_no, ord(char), _unichr2str(char)))
+    except IOError:
+        logger.debug("IO Error.")
+        return ERRCODE_IOERROR
 
     logger.debug("--- Process complete. ---")
     # --------------------------------------------------------------------------
