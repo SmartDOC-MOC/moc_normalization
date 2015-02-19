@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 
 # ==============================================================================
 # Constants
-PROG_VERSION = "1.0"
+PROG_VERSION = "1.1"
 PROG_DESCR = "OCR Result Normalizer for ICDAR15 SmartDOC"
 PROG_NAME = "moc_norm"
 
@@ -187,7 +187,7 @@ def main():
         logger.debug("--- Process started. ---")
         line_no = 0
         # with codecs.open(args.input, 'r', "UTF-8") as file_input:
-        with io.open(args.input, 'r') as file_input:
+        with io.open(args.input, 'rt', encoding="UTF-8") as file_input:
             # io lines are unicode code point sequences with LF-normalized EOL
             for line in file_input:
                 line_no += 1
