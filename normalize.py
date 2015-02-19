@@ -11,12 +11,18 @@ results, and is used before computing OCR accuracy.
 
 Normalization performed here is idempotent.
 
-Warning:
-    End of line can be EITHER CRLF (Windows), CR (old Macintosh) or LF (OSX, 
-    *nix).
+Input restrictions:
+    - Encoding MUST BE UTF-8.
+    - End of line MUST BE either CRLF (Windows), CR (old Macintosh) or LF (OSX,
+      *nix).
+
+Output post-conditions:
+    - Encoding WILL BE UTF-8.
+    - End of line WILL BE LF.
+
 
 Sample usage:
-    normalize.py /path/to/utf-8/text/file.txt -o /path/to/normalized/output.txt
+    normalize.py /path/to/utf-8/text/file.txt /path/to/normalized/output.txt
 
 """
 
@@ -28,7 +34,6 @@ import argparse
 import sys
 import unicodedata
 import io
-# import codecs
 
 # ==============================================================================
 # Logging
@@ -36,7 +41,7 @@ logger = logging.getLogger(__name__)
 
 # ==============================================================================
 # Constants
-PROG_VERSION = "1.1"
+PROG_VERSION = "2.0"
 PROG_DESCR = "OCR Result Normalizer for ICDAR15 SmartDOC"
 PROG_NAME = "moc_norm"
 
@@ -153,8 +158,8 @@ def main():
         help="Activate debug output.")
     parser.add_argument('input', 
         help='Input text file with UTF-8 encoding.')
-    parser.add_argument('-o', '--output', 
-        help="Optional path to output file.")
+    parser.add_argument('output', 
+        help="Path to normalized output file.")
     args = parser.parse_args()
 
     # -----------------------------------------------------------------------------
@@ -173,23 +178,12 @@ def main():
     # --------------------------------------------------------------------------
     charset = ALLOWED_INPUT + u'\u000a' # Tolerate '\n' (LF) EOL
 
-    file_output = None
-    fo_is_real_file = False
-    try:
-        if args.output:
-            # file_output = codecs.open(args.output, 'w', "UTF-8")
-            file_output = open(args.output, "w") # FIXME specify target encoding and EOL
-            fo_is_real_file = True
-        else:
-            file_output = sys.stdout
-            logger.info("Output results to stdout.")
-            # FIXME detect necessary encoding here, subst. policy and warn if necessary
-
+    with io.open(args.output, "wt", encoding="UTF-8", newline='', errors="strict") as file_output:
+        # output lines are utf-8-encoded and have LF EOL
         logger.debug("--- Process started. ---")
         line_no = 0
-        # with codecs.open(args.input, 'r', "UTF-8") as file_input:
         with io.open(args.input, "rt", encoding="UTF-8", newline=None, errors="strict") as file_input:
-            # io lines are unicode code point sequences with LF-normalized EOL
+            # input lines are Unicode code point sequences with LF-normalized EOL
             for line in file_input:
                 line_no += 1
 
@@ -216,14 +210,7 @@ def main():
                 line_tr = _transform(line_norm)
 
                 # Output new line
-                print >>file_output, line_tr.encode("UTF-8"), 
-                # FIXME encoding must be done at the output driver level, warning for unsupported charset if required
-                # Use io.TextIOBase.write()
-
-
-    finally:
-        if fo_is_real_file:
-            file_output.close()
+                file_output.write(line_tr) 
 
     logger.debug("--- Process complete. ---")
     # --------------------------------------------------------------------------
