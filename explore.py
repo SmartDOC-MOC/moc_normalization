@@ -1,12 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# TODO LICENCE (or in separate file)
 """
-Unicode Explorer.
+This program gives line by line, character by character information about the 
+content of an UTF-8 encoded file.
 
-It gives line by line, character by character information about the content of 
-an UTF-8 encoded file.
+This file is part of the tools used for the evaluation of OCR accuracy in the 
+context of the challenge 2 "Mobile OCR Challenge" of the SmartDOC competition 
+at ICDAR 2015. 
+
+Sample usage:
+    check.py /path/to/utf-8/text/file.txt
+
 """
-
 
 # ==============================================================================
 # Imports
@@ -24,9 +30,9 @@ logger = logging.getLogger(__name__)
 
 # ==============================================================================
 # Constants
-PROG_VERSION = "1.1"
+PROG_VERSION = "1.2"
 PROG_DESCR = "OCR Result Explorer for ICDAR15 SmartDOC"
-PROG_NAME = "moc_explorer"
+PROG_NAME = "moc_expl"
 
 ERRCODE_OK = 0
 ERRCODE_NOFILE = 10
@@ -111,12 +117,12 @@ def main():
 
     line_no = 0
     try:
-        with io.open(args.input, 'rt', encoding="UTF-8", newline=None, errors="strict") as file_input:
+        with io.open(args.input, 'rt', encoding="UTF-8", newline='', errors="strict") as file_input:
             for line in file_input:
                 line_no += 1
                 char_no = 0
                 sys.stdout.write("l:%03d (%d char.)\n" % (line_no, len(line)))
-                sys.stdout.write(line)
+                sys.stdout.write(u">>> %s\n" % line.rstrip('\r\n'))
                 for char in line:
                     char_no += 1
                     sys.stdout.write("\tc:%03d U+%04x %s\n" %  (char_no, ord(char), _unichr2str(char)))
