@@ -1,16 +1,38 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# TODO LICENCE (or in separate file)
+
+# SmartDOC-MOC file checker. Checks files charsets.
+# Copyright (c) 2015 - J. Chazalon - L3i / University of La Rochelle, France
+# For contact information, please see: <http://l3i.univ-larochelle.fr>
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 """
 This program checks text files to ensure they contain only legal characters.
 
 This file is part of the tools used for the evaluation of OCR accuracy in the 
 context of the challenge 2 "Mobile OCR Challenge" of the SmartDOC competition 
-at ICDAR 2015. 
+at ICDAR 2015.
 
 Sample usage:
     check.py /path/to/utf-8/text/file.txt
 
+
+Copyright (c) 2015 - J. Chazalon - L3i / University of La Rochelle, France
+This program comes with ABSOLUTELY NO WARRANTY; for details see `LICENCE' file.
+This is free software, and you are welcome to redistribute it under certain 
+conditions; see `LICENCE' file for details.
 """
 
 # ==============================================================================
@@ -98,8 +120,9 @@ def _unichr2str(unichar):
 def main():
     # Option parsing
     parser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
         description=PROG_DESCR, 
+        epilog=__doc__,
         version=PROG_VERSION)
     parser.add_argument('-d', '--debug', 
         action="store_true", 
