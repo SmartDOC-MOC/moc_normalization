@@ -7,7 +7,7 @@ The official website for the competition is at <http://l3i.univ-larochelle.fr/ic
 
 ## Summary for competition participants
 
-The only thing you should know about this project is that the file `check.py' is the one you need to control that your results do not contain illegal characters.
+The only thing you should know about this project is that the file `check.py` is the one you need to control that your results do not contain illegal characters.
 
 To control one of your files, simply use:
 
@@ -24,14 +24,15 @@ Your files MUST BE encoded with UTF-8.
 
 The current package contains the following programs:
 
-- `check.py': checks text files to ensure they contain only legal characters
-- `normalize.py': checks and normalizes participants results, and will be used before computing OCR accuracy
-- `explore.py': gives line by line, character by character information about the content of an UTF-8 encoded file
+- `check.py`: checks text files to ensure they contain only legal characters
+- `normalize.py`: checks and normalizes participants results, and will be used before computing OCR accuracy
+- `explore.py`: gives line by line, character by character information about the content of an UTF-8 encoded file
 
 It also contains several documents:
-- `LICENCE': GPL-v3 licence details
-- `README.md': this file
-- `char_mapping.ods': Spreadsheet file (Libreoffice Calc format) containing details about the allowed character set and the normalization performed
+
+- `LICENCE`: GPL-v3 license details
+- `README.md`: this file
+- `char_mapping.ods`: Spreadsheet file (Libreoffice Calc format) containing details about the allowed character set and the normalization performed
 
 
 ## Installation
@@ -50,14 +51,16 @@ python normalize.py /path/to/some/result.txt /path/to/normalized/output.txt
 # Review Unicode content in a file
 python explore.py /path/to/some/result.txt
 ```
-You can review the command line syntax with the `-h' option for all programs.
+
+You can review the command line syntax with the `-h` option for all programs.
 
 
 ## Design choices
 
-We chose to implement this solution as independant Python 2 scripts for several reasons:
+We chose to implement this solution as independent Python 2 scripts for several reasons:
+
 - Portability: Python 2 is widely available on many platforms
-- Simplicity: No complilation required, works from any directory, no configuration
+- Simplicity: No compilation required, works from any directory, no configuration
 - Robustness: Python has excellent Unicode support
 - Openness: Participants can review, reuse and improve our methods
 
