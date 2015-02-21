@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 
 # SmartDOC-MOC file explorer. Outputs readable information about Unicode content.
-# Copyright (c) 2015 - J. Chazalon, S. Eskenazi - L3i / University of La Rochelle, France
+# Copyright (c) 2015 - J. Chazalon, S. Eskenazi 
+#                    - L3i / University of La Rochelle, France
 # For contact information, please see: <http://l3i.univ-larochelle.fr>
 # 
 # This program is free software: you can redistribute it and/or modify
@@ -30,7 +31,8 @@ Sample usage:
     check.py /path/to/utf-8/text/file.txt
 
 
-Copyright (c) 2015 - J. Chazalon - L3i / University of La Rochelle, France
+Copyright (c) 2015 - J. Chazalon, S. Eskenazi 
+                   - L3i / University of La Rochelle, France
 This program comes with ABSOLUTELY NO WARRANTY; for details see `LICENCE' file.
 This is free software, and you are welcome to redistribute it under certain 
 conditions; see `LICENCE' file for details.
