@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# TODO LICENCE (or in separate file)
 """
-TODO LICENCE (or in separate file)
-
-
 This file is part of the tools used for the evaluation of OCR accuracy in the 
 context of the challenge 2 "Mobile OCR Challenge" of the SmartDOC competition 
 at ICDAR 2015. This particular program checks and normalizes participants 
