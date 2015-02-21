@@ -2,12 +2,13 @@
 # -*- coding: utf-8 -*-
 # TODO LICENCE (or in separate file)
 """
+This program checks and normalizes participants results, and will be used 
+before computing OCR accuracy.
+Normalization performed here is idempotent.
+
 This file is part of the tools used for the evaluation of OCR accuracy in the 
 context of the challenge 2 "Mobile OCR Challenge" of the SmartDOC competition 
-at ICDAR 2015. This particular program checks and normalizes participants 
-results, and is used before computing OCR accuracy.
-
-Normalization performed here is idempotent.
+at ICDAR 2015. 
 
 Input restrictions:
     - Encoding MUST BE UTF-8.
@@ -24,7 +25,6 @@ Sample usage:
 
 """
 
-
 # ==============================================================================
 # Imports
 import logging
@@ -39,12 +39,13 @@ logger = logging.getLogger(__name__)
 
 # ==============================================================================
 # Constants
-PROG_VERSION = "2.0"
+PROG_VERSION = "2.1"
 PROG_DESCR = "OCR Result Normalizer for ICDAR15 SmartDOC"
 PROG_NAME = "moc_norm"
 
 ERRCODE_OK = 0
 ERRCODE_NOFILE = 10
+ERRCODE_EXTRACHAR = 50
 
 ALLOWED_INPUT = u""" !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~ ¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿŒœŠšŸŽžƒˆ˜–—‘’‚“”„†‡•…‰‹›€™ﬁﬂﬀﬃﬄ"""
 # Horizontal tab added separately for convenience
@@ -175,7 +176,8 @@ def main():
 
     # --------------------------------------------------------------------------
     charset = ALLOWED_INPUT + u'\u000a' # Tolerate '\n' (LF) EOL
-
+    
+    err_count = 0
     with io.open(args.output, "wt", encoding="UTF-8", newline='', errors="strict") as file_output:
         # output lines are utf-8-encoded and have LF EOL
         logger.debug("--- Process started. ---")
@@ -192,9 +194,10 @@ def main():
                     char_no += 1
                     if char not in charset:
                         extra_chars.append((char, char_no))
+                        err_count += 1
                     # logger.debug("\tl:%03d c:%03d %04x %s" %  (line_no, char_no, ord(char), _unichr2str(char)))
                 if extra_chars:
-                    logger.error("Got illegal %d character(s) in line %d : " % (len(extra_chars), line_no))
+                    logger.error("Got %d illegal character(s) in line %d : " % (len(extra_chars), line_no))
                     for i in range(min(CHAR_ERR_LIM, len(extra_chars))):
                         char, pos = extra_chars[i]
                         logger.error("\tl:%03d c:%03d %s" %  (line_no, pos, _unichr2str(char)))
@@ -213,9 +216,17 @@ def main():
     logger.debug("--- Process complete. ---")
     # --------------------------------------------------------------------------
 
+    ret_code = ERRCODE_OK
+    if err_count > 0:
+        logger.error(_DBGSEP)
+        logger.error("Input file contains %d illegal characters." % err_count)
+        ret_code = ERRCODE_EXTRACHAR
+    else:
+        logger.debug("Input file contains only legal characters.")
+
     logger.debug("Clean exit.")
     logger.debug(_DBGSEP)
-    return ERRCODE_OK
+    return ret_code
     # --------------------------------------------------------------------------
 
 # ==============================================================================
