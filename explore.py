@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # SmartDOC-MOC file explorer. Outputs readable information about Unicode content.
-# Copyright (c) 2015 - J. Chazalon - L3i / University of La Rochelle, France
+# Copyright (c) 2015 - J. Chazalon, S. Eskenazi - L3i / University of La Rochelle, France
 # For contact information, please see: <http://l3i.univ-larochelle.fr>
 # 
 # This program is free software: you can redistribute it and/or modify

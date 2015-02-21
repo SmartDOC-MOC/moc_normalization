@@ -65,6 +65,13 @@ We chose to implement this solution as independent Python 2 scripts for several 
 - Openness: Participants can review, reuse and improve our methods
 
 
+## Licenses
+
+All programs are licensed under the GPL v3 license. We recommend you check <http://choosealicense.com/licenses/gpl-3.0/> for an uncomplicated explanation of what is required, permitted and forbidden when you redistribute this program.
+
+The character mapping table (`char_mapping.ods`) is licensed under the Creative Commons Attribution 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by/4.0/.
+
+
 ## Contacting the authors
 
 Please check the official competition website at <http://l3i.univ-larochelle.fr/icdar2015smartdoc> to contact the authors.
