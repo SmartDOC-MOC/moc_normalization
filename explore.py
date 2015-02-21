@@ -106,10 +106,12 @@ def main():
         try:
             encoder = codecs.getwriter(encoding)
         except LookupError:
-            logger.warn("Unknown encoding %s specified in locale().\n" % encoding)
+            logger.warn("Unknown encoding %s specified in locale().\n" 
+                        % encoding)
             encoder = codecs.getwriter('UTF-8')
         if encoding.upper() != 'UTF-8':
-            logger.warn("Stdout in %s format. Out-of-charset signs are represented in XML-coded format." % encoding)
+            logger.warn(("Stdout in %s format. Out-of-charset signs are "
+                         "represented in XML-coded format.") % encoding)
         try:
             sys.stdout = encoder(sys.stdout.buffer, 'xmlcharrefreplace')
         except AttributeError:
@@ -117,7 +119,8 @@ def main():
 
     line_no = 0
     try:
-        with io.open(args.input, 'rt', encoding="UTF-8", newline='', errors="strict") as file_input:
+        with io.open(args.input, 'rt', encoding="UTF-8", 
+                     newline='', errors="strict") as file_input:
             for line in file_input:
                 line_no += 1
                 char_no = 0
@@ -125,7 +128,8 @@ def main():
                 sys.stdout.write(u">>> %s\n" % line.rstrip('\r\n'))
                 for char in line:
                     char_no += 1
-                    sys.stdout.write("\tc:%03d U+%04x %s\n" %  (char_no, ord(char), _unichr2str(char)))
+                    sys.stdout.write("\tc:%03d U+%04x %s\n" 
+                                     % (char_no, ord(char), _unichr2str(char)))
     except IOError:
         logger.debug("IO Error.")
         return ERRCODE_IOERROR

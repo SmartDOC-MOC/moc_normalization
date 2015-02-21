@@ -47,9 +47,13 @@ ERRCODE_OK = 0
 ERRCODE_NOFILE = 10
 ERRCODE_EXTRACHAR = 50
 
-ALLOWED_INPUT = u""" !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~ ¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿŒœŠšŸŽžƒˆ˜–—‘’‚“”„†‡•…‰‹›€™ﬁﬂﬀﬃﬄ"""
+ALLOWED_INPUT = (
+    u""" !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abc"""
+    u"""defghijklmnopqrstuvwxyz{|}~ ¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉ"""
+    u"""ÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿŒœŠšŸŽžƒˆ˜–—‘’"""
+    u"""‚“”„†‡•…‰‹›€™ﬁﬂﬀﬃﬄ"""
 # Horizontal tab added separately for convenience
-ALLOWED_INPUT += u"\u0009"
+    u"\u0009"
 # additions due to Unicode normalization:
 # - 0308 COMBINING DIAERESIS
 # - 0301 COMBINING ACUTE ACCENT 
@@ -58,7 +62,8 @@ ALLOWED_INPUT += u"\u0009"
 # - 0303 COMBINING TILDE
 # - 0304 COMBINING MACRON   
 # - 2044 FRACTION SLASH 
-ALLOWED_INPUT += u"\u0308\u0301\u03BC\u0327\u0303\u0304\u2044"
+    u"\u0308\u0301\u03BC\u0327\u0303\u0304\u2044"
+    )
 
 TRANSFORMATIONS = [
     (u"\u0009", u" "), # HTAB to SPACE
@@ -161,13 +166,13 @@ def main():
         help="Path to normalized output file.")
     args = parser.parse_args()
 
-    # -----------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Logger activation
     _initLogger(logger)
     if args.debug:
         logger.setLevel(logging.DEBUG)
     
-    # -----------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Output log header
     _programHeader(logger, PROG_NAME, PROG_VERSION)
     logger.debug(_DBGSEP)
@@ -178,11 +183,13 @@ def main():
     charset = ALLOWED_INPUT + u'\u000a' # Tolerate '\n' (LF) EOL
     
     err_count = 0
-    with io.open(args.output, "wt", encoding="UTF-8", newline='', errors="strict") as file_output:
+    with io.open(args.output, "wt", encoding="UTF-8", newline='', 
+                 errors="strict") as file_output:
         # output lines are utf-8-encoded and have LF EOL
         logger.debug("--- Process started. ---")
         line_no = 0
-        with io.open(args.input, "rt", encoding="UTF-8", newline=None, errors="strict") as file_input:
+        with io.open(args.input, "rt", encoding="UTF-8", newline=None, 
+                     errors="strict") as file_input:
             # input lines are Unicode code point sequences with LF-normalized EOL
             for line in file_input:
                 line_no += 1
@@ -195,14 +202,18 @@ def main():
                     if char not in charset:
                         extra_chars.append((char, char_no))
                         err_count += 1
-                    # logger.debug("\tl:%03d c:%03d %04x %s" %  (line_no, char_no, ord(char), _unichr2str(char)))
+                    # logger.debug("\tl:%03d c:%03d %04x %s" 
+                    #     % (line_no, char_no, ord(char), _unichr2str(char)))
                 if extra_chars:
-                    logger.error("Got %d illegal character(s) in line %d : " % (len(extra_chars), line_no))
+                    logger.error("Got %d illegal character(s) in line %d : " 
+                                 % (len(extra_chars), line_no))
                     for i in range(min(CHAR_ERR_LIM, len(extra_chars))):
                         char, pos = extra_chars[i]
-                        logger.error("\tl:%03d c:%03d %s" %  (line_no, pos, _unichr2str(char)))
+                        logger.error("\tl:%03d c:%03d %s" 
+                                     % (line_no, pos, _unichr2str(char)))
                     if len(extra_chars) > CHAR_ERR_LIM:
-                        logger.error("\t ... and %d other(s)." % (len(extra_chars) - CHAR_ERR_LIM))
+                        logger.error("\t ... and %d other(s)." 
+                                     % (len(extra_chars) - CHAR_ERR_LIM))
 
                 # Unicode normalization
                 line_norm = unicodedata.normalize('NFKC', line)

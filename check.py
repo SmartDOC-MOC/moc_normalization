@@ -35,9 +35,13 @@ ERRCODE_OK = 0
 ERRCODE_NOFILE = 10
 ERRCODE_EXTRACHAR = 50
 
-ALLOWED_INPUT = u""" !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~ ¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿŒœŠšŸŽžƒˆ˜–—‘’‚“”„†‡•…‰‹›€™ﬁﬂﬀﬃﬄ"""
+ALLOWED_INPUT = (
+    u""" !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abc"""
+    u"""defghijklmnopqrstuvwxyz{|}~ ¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉ"""
+    u"""ÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿŒœŠšŸŽžƒˆ˜–—‘’"""
+    u"""‚“”„†‡•…‰‹›€™ﬁﬂﬀﬃﬄ"""
 # Horizontal tab added separately for convenience
-ALLOWED_INPUT += u"\u0009"
+    u"\u0009"
 # additions due to Unicode normalization:
 # - 0308 COMBINING DIAERESIS
 # - 0301 COMBINING ACUTE ACCENT 
@@ -46,7 +50,8 @@ ALLOWED_INPUT += u"\u0009"
 # - 0303 COMBINING TILDE
 # - 0304 COMBINING MACRON   
 # - 2044 FRACTION SLASH 
-ALLOWED_INPUT += u"\u0308\u0301\u03BC\u0327\u0303\u0304\u2044"
+    u"\u0308\u0301\u03BC\u0327\u0303\u0304\u2044"
+    )
 
 
 CHAR_ERR_LIM = 5
@@ -122,7 +127,8 @@ def main():
     logger.debug("--- Process started. ---")
     line_no = 0
     err_count = 0
-    with io.open(args.input, "rt", encoding="UTF-8", newline=None, errors="strict") as file_input:
+    with io.open(args.input, "rt", encoding="UTF-8", newline=None, 
+                 errors="strict") as file_input:
         for line in file_input:
             line_no += 1
             extra_chars = []
@@ -133,12 +139,15 @@ def main():
                     extra_chars.append((char, char_no))
                     err_count += 1
             if extra_chars:
-                logger.error("Got %d illegal character(s) in line %d : " % (len(extra_chars), line_no))
+                logger.error("Got %d illegal character(s) in line %d : " 
+                             % (len(extra_chars), line_no))
                 for i in range(min(CHAR_ERR_LIM, len(extra_chars))):
                     char, pos = extra_chars[i]
-                    logger.error("\tl:%03d c:%03d %s" %  (line_no, pos, _unichr2str(char)))
+                    logger.error("\tl:%03d c:%03d %s" 
+                                 % (line_no, pos, _unichr2str(char)))
                 if len(extra_chars) > CHAR_ERR_LIM:
-                    logger.error("\t ... and %d other(s)." % (len(extra_chars) - CHAR_ERR_LIM))
+                    logger.error("\t ... and %d other(s)." 
+                                 % (len(extra_chars) - CHAR_ERR_LIM))
 
     logger.debug("--- Process complete. ---")
     # --------------------------------------------------------------------------
@@ -146,7 +155,8 @@ def main():
     if err_count > 0:
         logger.error(_DBGSEP)
         logger.error("Input file contains %d illegal characters." % err_count)
-        logger.error("Please review previous error messages and fix them before submitting your results.")
+        logger.error("Please review previous error messages and "
+                     "fix them before submitting your results.")
         logger.error(_DBGSEP)
         ret_code = ERRCODE_EXTRACHAR
     else:
