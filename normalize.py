@@ -62,7 +62,7 @@ logger = logging.getLogger(__name__)
 
 # ==============================================================================
 # Constants
-PROG_VERSION = "2.1"
+PROG_VERSION = "2.2"
 PROG_DESCR = "OCR Result Normalizer for ICDAR15 SmartDOC"
 PROG_NAME = "moc_norm"
 
@@ -86,6 +86,8 @@ ALLOWED_INPUT = (
 # - 0304 COMBINING MACRON   
 # - 2044 FRACTION SLASH 
     u"\u0308\u0301\u03BC\u0327\u0303\u0304\u2044"
+# ZERO WIDTH NO-BREAK SPACE    
+    u"\ufeff"
     )
 
 TRANSFORMATIONS = [
@@ -131,6 +133,7 @@ TRANSFORMATIONS = [
     # (u"\uFB03", u"ffi"), # (actually not wrote to UTF-8 output so not done here)
     # (u"\uFB04", u"ffl"),
     (u"⁄", u"/"), # FRACTION SLASH U+2044
+    (u"\ufeff", u""), # ZERO WIDTH NO-BREAK SPACE // Byte Order Mark
     ]
 
 CHAR_ERR_LIM = 5

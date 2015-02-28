@@ -51,7 +51,7 @@ logger = logging.getLogger(__name__)
 
 # ==============================================================================
 # Constants
-PROG_VERSION = "1.0"
+PROG_VERSION = "1.1"
 PROG_DESCR = "OCR Result Checker for ICDAR15 SmartDOC"
 PROG_NAME = "moc_check"
 
@@ -75,6 +75,8 @@ ALLOWED_INPUT = (
 # - 0304 COMBINING MACRON   
 # - 2044 FRACTION SLASH 
     u"\u0308\u0301\u03BC\u0327\u0303\u0304\u2044"
+# ZERO WIDTH NO-BREAK SPACE    
+    u"\ufeff"
     )
 
 
